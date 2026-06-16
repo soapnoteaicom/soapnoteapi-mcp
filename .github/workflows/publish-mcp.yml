@@ -1,0 +1,57 @@
+name: publish
+
+# Releases on a version tag. To ship:
+#   1. bump "version" in BOTH package.json and server.json (must be equal)
+#   2. git commit, then:  git tag v0.1.1 && git push --tags
+#
+# Requires two repo secrets (Settings → Secrets and variables → Actions):
+#   NPM_TOKEN        — npm Automation token (bypasses 2FA)
+#   MCP_PRIVATE_KEY  — the Ed25519 private key string used by `mcp-publisher login dns`
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Verify tag matches package.json and server.json
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          SRV="$(node -p "require('./server.json').version")"
+          echo "tag=$TAG  package.json=$PKG  server.json=$SRV"
+          if [ "$TAG" != "$PKG" ] || [ "$TAG" != "$SRV" ]; then
+            echo "::error::Tag v$TAG must equal package.json ($PKG) and server.json ($SRV)"
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install mcp-publisher
+        run: curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+
+      - name: Publish to the official MCP registry
+        env:
+          MCP_PRIVATE_KEY: ${{ secrets.MCP_PRIVATE_KEY }}
+        run: |
+          ./mcp-publisher login dns --domain soapnoteapi.com --private-key "$MCP_PRIVATE_KEY"
+          ./mcp-publisher publish
