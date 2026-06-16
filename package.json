@@ -1,0 +1,63 @@
+{
+  "name": "soapnoteapi-mcp",
+  "version": "0.1.0",
+  "mcpName": "com.soapnoteapi/soapnoteapi-mcp",
+  "description": "Model Context Protocol (MCP) server for SOAPNoteAPI — turn clinical transcripts or audio into structured SOAP notes, ICD-10/CPT billing-code suggestions, patient summaries, and visit summaries.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "soapnoteapi-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "server.json"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "~5.6.3"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "model-context-protocol",
+    "mcp-server",
+    "soap-notes",
+    "clinical-documentation",
+    "medical",
+    "healthcare",
+    "ehr",
+    "emr",
+    "ai-scribe",
+    "medical-scribe",
+    "icd-10",
+    "cpt",
+    "billing-codes",
+    "soapnoteapi"
+  ],
+  "homepage": "https://www.soapnoteapi.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soapnoteaicom/soapnoteapi-mcp.git"
+  },
+  "bugs": {
+    "url": "https://www.soapnoteapi.com/support"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
