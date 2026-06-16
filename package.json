@@ -1,6 +1,6 @@
 {
   "name": "soapnoteapi-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mcpName": "com.soapnoteapi/soapnoteapi-mcp",
   "description": "Model Context Protocol (MCP) server for SOAPNoteAPI — turn clinical transcripts or audio into structured SOAP notes, ICD-10/CPT billing-code suggestions, patient summaries, and visit summaries.",
   "license": "MIT",
@@ -28,7 +28,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^22.19.21",
+    "@types/node": "^22",
     "tsx": "^4.21.0",
     "typescript": "~5.6.3"
   },

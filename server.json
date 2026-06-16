@@ -3,7 +3,7 @@
   "name": "com.soapnoteapi/soapnoteapi-mcp",
   "title": "SOAPNoteAPI",
   "description": "Generate clinical SOAP notes, billing codes, and visit summaries from transcripts or audio.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "websiteUrl": "https://www.soapnoteapi.com",
   "repository": {
     "url": "https://github.com/soapnoteaicom/soapnoteapi-mcp",
@@ -14,7 +14,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "soapnoteapi-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       },

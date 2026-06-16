@@ -91,6 +91,26 @@ function requireKey(): void {
   }
 }
 
+// ── BAA reminder (warn, never block) ───────────────────────────────────────────
+// A BAA is a legal agreement between organizations, executed via SOAPNoteAPI's
+// white-glove process — the client deliberately does NOT block or gate PHI. We
+// only surface a one-time, non-blocking reminder on the first PHI-bearing call.
+const BAA_NOTICE =
+  "\n\n⚠️ BAA reminder: For real production workloads containing PHI, your organization " +
+  "must have an executed Business Associate Agreement (BAA) with SOAPNoteAPI. Test/sandbox " +
+  "keys are for non-PHI evaluation. Arrange a BAA at https://soapnoteapi.com/security/. " +
+  "(Reminder only — this does not restrict your request.)";
+let baaNoticeShown = false;
+function withBaaNotice(result: ToolResult): ToolResult {
+  if (baaNoticeShown) return result;
+  baaNoticeShown = true;
+  return { ...result, content: [...result.content, { type: "text", text: BAA_NOTICE }] };
+}
+// Wrapper for PHI-bearing tools: runs normally, then appends the one-time reminder.
+async function runPhi(fn: () => Promise<unknown>): Promise<ToolResult> {
+  return withBaaNotice(await run(fn));
+}
+
 // Reusable optional patient-context shape (maps to the API's context.patient_info).
 const patientShape = z
   .object({
@@ -125,14 +145,16 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // ── server ───────────────────────────────────────────────────────────────────
 
 const server = new McpServer(
-  { name: "soapnoteapi-mcp", version: "0.1.0" },
+  { name: "soapnoteapi-mcp", version: "0.1.1" },
   {
     instructions:
       "Tools for SOAPNoteAPI (https://www.soapnoteapi.com): generate structured clinical SOAP " +
       "notes, ICD-10/CPT billing-code suggestions, patient summaries, and longitudinal visit " +
       "summaries from clinical transcripts or audio recordings. All billing codes and clinical " +
       "content are AI-generated decision support and require review by a qualified clinician/coder " +
-      "before use. Call list_specialties to see valid specialty values.",
+      "before use. For real production workloads containing PHI, your organization must have an " +
+      "executed BAA with SOAPNoteAPI (arrange at https://soapnoteapi.com/security/); test/sandbox " +
+      "keys are for non-PHI evaluation. Call list_specialties to see valid specialty values.",
   },
 );
 
@@ -172,7 +194,7 @@ server.registerTool(
     },
   },
   async (args) => {
-    return run(() => {
+    return runPhi(() => {
       requireKey();
       const body = omitUndefined({
         transcript: args.transcript,
@@ -238,7 +260,7 @@ server.registerTool(
     },
   },
   async (args) =>
-    run(() => {
+    runPhi(() => {
       requireKey();
       const body = omitUndefined({
         visits: args.visits,
@@ -283,7 +305,7 @@ server.registerTool(
     },
   },
   async (args) =>
-    run(async () => {
+    runPhi(async () => {
       requireKey();
       const metadata = omitUndefined({
         specialty: args.specialty,
@@ -350,6 +372,9 @@ async function main(): Promise<void> {
   // stderr only — never stdout (stdout is the MCP protocol channel).
   console.error(
     `soapnoteapi-mcp ready (base=${BASE_URL ?? "https://api.soapnoteapi.com"}, key=${client.hasKey ? "set" : "MISSING"})`,
+  );
+  console.error(
+    "Reminder: process PHI only under an executed BAA with SOAPNoteAPI. Test keys are for non-PHI evaluation. https://soapnoteapi.com/security/",
   );
 }
 

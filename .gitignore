@@ -2,6 +2,6 @@ dist
 node_modules
 *.tsbuildinfo
 
-# secrets - never commit the registry signing key
+# secrets — never commit the registry signing key
 *.pem
 key.pem
